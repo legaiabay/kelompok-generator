@@ -23,6 +23,12 @@ angular.module('kelGenerator',['ionic'])
 
   //Banyaknya orang
   var listOrang = 0;
+
+  //Daftar Ketua
+  var listKetua = [];
+
+  //Banyak Ketua
+  var banyakKetua = 0;
   
   //Data keterangan
   $scope.dataApp = {};
@@ -33,17 +39,23 @@ angular.module('kelGenerator',['ionic'])
   //Tampilan Form Daftar Orang kalau kosong
   $scope.namaFormKosong = true;
 
+  //Checkbox ada Ketua
+  $scope.adaKetuaHide = true;
+
   //Daftar nama setelah diacak
   $scope.listNama2 = [[]];
 
   //Banyak Kelompok
   $scope.daftarKelompok = [];
 
+  //Data Ketua Kelompok
+  $scope.dataKetua = listKetua;
+
   //Simpanan data Daftar Nama
   $scope.dataNama = listNama;
 
   //generateKelompok() : Buat daftar kelompok dengan anggota acak
-  var generateKelompok = function(){
+  var generateKelompok = function(ketua){
     $scope.daftarKelompok = [];
     $scope.listNama2 = [[]];
     var daftarOrang = [];
@@ -55,10 +67,18 @@ angular.module('kelGenerator',['ionic'])
 
     daftarOrang = shuffle(daftarOrang);
 
-    for(j=0;j<$scope.dataApp.banyakKelompok;j++){
-      $scope.daftarKelompok.push(j+1);
-      daftarOrang2[j] = daftarOrang.slice(0,$scope.dataApp.anggotaPerKelompok);
-      daftarOrang.splice(0,$scope.dataApp.anggotaPerKelompok);
+    if(!ketua){
+      for(j=0;j<$scope.dataApp.banyakKelompok;j++){
+        $scope.daftarKelompok.push(j+1);
+        daftarOrang2[j] = daftarOrang.slice(0,$scope.dataApp.anggotaPerKelompok);
+        daftarOrang.splice(0,$scope.dataApp.anggotaPerKelompok);
+      }
+    } else {
+      for(j=0;j<$scope.dataApp.banyakKelompok;j++){
+        $scope.daftarKelompok.push(j+1);
+        daftarOrang2[j] = daftarOrang.slice(0,$scope.dataApp.anggotaPerKelompok-1);
+        daftarOrang.splice(0,$scope.dataApp.anggotaPerKelompok-1);
+      }
     }
 
     $scope.listNama2 = daftarOrang2;
@@ -84,15 +104,19 @@ function shuffle(array) {
   return array;
 }
 
- //showModal() : Menampilkan Modal View Daftar Kelompok 
-  showModal = function(){
-    $scope.modal.show();
-  };
-
   //simpanData() : Simpan data keterangan
   $scope.simpanData = function(){
     listNama.length = 0;
-    listOrang = $scope.dataApp.banyakOrang;
+    listKetua.length = 0;
+    banyakKetua = $scope.dataApp.banyakKelompok;
+
+    if($scope.dataApp.adaKetua){
+      listOrang = $scope.dataApp.banyakOrang-$scope.dataApp.banyakKelompok;
+    }
+    else {
+      listOrang = $scope.dataApp.banyakOrang;
+    }
+    
     if(listOrang > 0){
       for(i=0;i<listOrang;i++){
         listNama.push({
@@ -101,6 +125,18 @@ function shuffle(array) {
       };
       $scope.lihatNamaForm = true;
       $scope.namaFormKosong = false;
+
+       if($scope.dataApp.adaKetua){
+        $scope.adaKetuaHide = false;
+        for(j=0;j<banyakKetua;j++){
+          listKetua.push({
+            id : j
+          });
+        };
+      }
+      else {
+        $scope.adaKetuaHide = true;
+      }
     }
   };
 
@@ -112,7 +148,7 @@ function shuffle(array) {
     });
     _generateConfirm.then(function(res){
       if(res){
-        generateKelompok();
+        generateKelompok($scope.dataApp.adaKetua);
         $ionicLoading.show({
           content: 'Loading',
           animation: 'fade-in',
@@ -122,17 +158,38 @@ function shuffle(array) {
         });
         $timeout(function () {
           $ionicLoading.hide();
-          showModal();
+          showModal($scope.dataApp.adaKetua);
         }, 1000);
       }
     });
   };
 
   //Setup Modal View untuk daftar kelompok
-  $ionicModal.fromTemplateUrl('hasil.html', {
-    scope: $scope,
-    animation: 'slide-in-up'
-  }).then(function(modal) {
-    $scope.modal = modal;
-  });
-});
+    $ionicModal.fromTemplateUrl('hasil.html', {
+      scope: $scope,
+      animation: 'slide-in-up'
+    }).then(function(modal) {
+      $scope.modalA = modal;
+    });
+
+     $ionicModal.fromTemplateUrl('hasil-ketua.html', {
+      scope: $scope,
+      animation: 'slide-in-up'
+    }).then(function(modal) {
+      $scope.modalB = modal;
+    });
+  
+//showModal() : Menampilkan Modal View Daftar Kelompok
+  showModal = function(ketua){
+    if(!ketua){
+      $scope.modalA.show();
+    } else {
+      $scope.modalB.show();
+    }
+  };
+
+  $scope.hideModal = function(){
+      $scope.modalA.hide();
+      $scope.modalB.hide();
+  }
+})
