@@ -6,4 +6,4 @@ Changelog :
 
 Download (APK) : https://goo.gl/NRJ7tG
 
-<img src="https://i.imgur.com/Sfki6t4.png" width="300"/> <img src="https://i.imgur.com/UlUclpX.png" width="300"/>
+<img src="https://i.imgur.com/S50J2AT.png" width="300"/> <img src="https://i.imgur.com/82oQsRI.png" width="300"/>
